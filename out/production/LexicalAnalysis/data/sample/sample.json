@@ -1,0 +1,9 @@
+{
+  "template": [
+    "code.re"
+  ],
+
+  "testcase": [
+    "code.i"
+  ]
+}
