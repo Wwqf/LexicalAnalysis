@@ -5,9 +5,9 @@ public class A {
 		String str = "this is code." ;
 
 		if (test >= 10) {
-			_decimal = 20.0;
+			_decimal = 20.0E5;
 		} else {
-			_decimal = -20.0;
+			_decimal = -21231210.043433232;
 		}
 	}
 }
