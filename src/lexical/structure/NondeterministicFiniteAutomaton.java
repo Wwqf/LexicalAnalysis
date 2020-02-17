@@ -74,7 +74,8 @@ public class NondeterministicFiniteAutomaton {
 
 		for (State state : stateSets) {
 			Set<State> rec = recursiveQuery(new HashSet<>(), state, matchCharacter);
-			result.addAll(rec);
+			if (rec != null)
+				result.addAll(rec);
 		}
 
 		return result;
