@@ -21,7 +21,7 @@ public class BufferIO {
 	private char[] bufferOne, bufferTwo;
 
 	private int lexemeBegin = 0;
-	private int forward = 0;
+	private int forward = -1;
 
 	private BufferIO(Builder builder) {
 		this.reader = builder.reader;
@@ -57,12 +57,12 @@ public class BufferIO {
 				buffer = bufferOne;
 			} else buffer = bufferTwo;
 
-			while (lexemeBegin != forward) {
+			while (lexemeBegin < forward) {
 				builder.append(buffer[lexemeBegin++]);
 			}
 		} else {
 			char[] buffer = getCurrentBufferReference();
-			while (lexemeBegin != forward) {
+			while (lexemeBegin < forward) {
 				builder.append(buffer[lexemeBegin++]);
 			}
 		}
@@ -76,22 +76,20 @@ public class BufferIO {
 	 */
 	public char nextChar() {
 		char[] buffer = getCurrentBufferReference();
-		char c = buffer[forward];
+		char c = buffer[++forward];
 
 		if (c == EOF) {
 			if (forward == bufferSize - 1) {
 				if (currentTag == TAG_ONE) {
 					loadBuffer(TAG_TWO);
-					forward = 0;
+					forward = -1;
 				} else {
 					loadBuffer(TAG_ONE);
-					forward = 0;
+					forward = -1;
 				}
 			} else {
 				GlobalMark.stopLexicalAnalysis = true;
 			}
-		} else {
-			forward++;
 		}
 		return c;
 	}

@@ -8,10 +8,10 @@ import lexical.utils.DiagramSequence;
 
 import java.util.Map;
 
-public class TransitionGraphSet {
+public class UnifiedCollection {
 
 	private Map<String, TransitionGraph> transitionGraphs;
-	public TransitionGraphSet(Map<String, TransitionGraph> transitionGraphs) {
+	public UnifiedCollection(Map<String, TransitionGraph> transitionGraphs) {
 		this.transitionGraphs = transitionGraphs;
 	}
 
@@ -27,7 +27,7 @@ public class TransitionGraphSet {
 			// 只可更改序号，不可以更改属性类型
 			tg.diagram.getAccept().setType(StateType.ACCEPT_STATE);
 			tg.diagram.getAccept().setTypeCanModify(false);
-
+			tg.diagram.getAccept().token = tg.token;
 		}
 		DiagramSequence.adjustSequence(0, start);
 		return start;

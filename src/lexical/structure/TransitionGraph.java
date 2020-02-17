@@ -1,6 +1,7 @@
 package lexical.structure;
 
 import lexical.diagram.base.BaseStereotypeDiagram;
+import lexical.global.TokenTag;
 import lexical.rule.base.BaseRule;
 import lexical.table.TransitionTable;
 import lexical.utils.DiagramSequence;
@@ -8,6 +9,8 @@ import lexical.utils.DiagramSequence;
 public class TransitionGraph {
 	public BaseRule rule;
 	public BaseStereotypeDiagram diagram;
+
+	public TokenTag token;
 
 	public TransitionGraph(BaseRule rule) {
 		this.rule = rule;

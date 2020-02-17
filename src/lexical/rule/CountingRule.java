@@ -8,7 +8,6 @@ import lexical.rule.base.ComplicatedRule;
 
 /**
  * More like the combination ClosureRule and CombinationRule;
- * 计数规则的生成有限状态自动机还未完成
  * {1, 6}
  */
 public class CountingRule extends ComplicatedRule {

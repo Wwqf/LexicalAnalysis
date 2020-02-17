@@ -65,7 +65,7 @@ public class TransitionTable {
 
 		Set<Integer> keySet = tables.keySet();
 		Object[] arrayKeySet = keySet.toArray();
-//		Arrays.sort(arrayKeySet);
+		Arrays.sort(arrayKeySet);
 
 		Object[] arrayTerminalSymSet = terminalSymSet.toArray();
 		Arrays.sort(arrayTerminalSymSet);

@@ -2,6 +2,7 @@ package lexical.token;
 
 
 import lexical.global.TokenTag;
+import log.Log;
 
 public abstract class BaseToken {
 	private final TokenTag tag;
@@ -21,6 +22,11 @@ public abstract class BaseToken {
 
 	@Override
 	public String toString() {
+		if (tag == null) {
+			Log.error("token tag is null.");
+			return "";
+		}
+
 		if (value.equals("")) {
 			return "<" + tag.getStr() + ">";
 		}

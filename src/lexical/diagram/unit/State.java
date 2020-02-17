@@ -1,6 +1,7 @@
 package lexical.diagram.unit;
 
 
+import lexical.global.TokenTag;
 import lexical.rule.base.BaseRule;
 import lexical.rule.base.SimpleRule;
 
@@ -14,6 +15,8 @@ public class State {
 	private List<TransitionFunc> transitionFuncList = new ArrayList<>();
 
 	private boolean typeCanModify = true;
+
+	public TokenTag token;
 
 	public State() { }
 

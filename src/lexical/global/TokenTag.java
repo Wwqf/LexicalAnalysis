@@ -1,6 +1,7 @@
 package lexical.global;
 
 public enum TokenTag {
+	None("None"),
 	WS("WS"),
 	DELIMITER("DELIMITER"),
 	NUMBER("NUMBER"),
@@ -22,5 +23,13 @@ public enum TokenTag {
 
 	public String getStr() {
 		return str;
+	}
+
+	public static TokenTag match(String str) {
+		for (TokenTag tag:
+		     TokenTag.values()) {
+			if (str.equals(tag.str)) return tag;
+		}
+		return None;
 	}
 }

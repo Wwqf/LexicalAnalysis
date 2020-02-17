@@ -73,21 +73,30 @@ public class NondeterministicFiniteAutomaton {
 		Set<State> result = new HashSet<>();
 
 		for (State state : stateSets) {
-			Set<State> rec = recursiveQuery(state, matchCharacter);
+			Set<State> rec = recursiveQuery(new HashSet<>(), state, matchCharacter);
 			result.addAll(rec);
 		}
 
 		return result;
 	}
 
-	private Set<State> recursiveQuery(State state, char matchChar) {
+	public Set<State> move(State state, char matchCharacter) {
+		return recursiveQuery(new HashSet<>(), state, matchCharacter);
+	}
+
+	private Set<State> recursiveQuery(Set<State> queryState, State state, char matchChar) {
+		if (queryState.contains(state)) return null;
+		queryState.add(state);
+
 		Set<State> result = new HashSet<>();
 		for (TransitionFunc func : state.getTransitionFuncList()) {
 			if (func.match(matchChar)) {
 				result.add(func.getNextState());
 			}
 			if (func.match(GlobalMark.Epsilon)) {
-				result.addAll(recursiveQuery(func.getNextState(), matchChar));
+				Set<State> rec = recursiveQuery(queryState, func.getNextState(), matchChar);
+				if (rec != null)
+					result.addAll(rec);
 			}
 		}
 		return result;

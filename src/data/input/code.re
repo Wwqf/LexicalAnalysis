@@ -1,3 +1,4 @@
+%%
 ws -> [ \t\n]
 delimiter -> (, | ; | \{ | \} | \( | \))
 
@@ -20,3 +21,25 @@ array -> {type}\[\]
 if -> if
 else -> else
 relop -> (<|<=|=|!=|>|>=)
+
+%%
+ws -> WS
+delimiter -> DELIMITER
+
+digit -> NUMBER
+letter_ul -> ID
+
+number -> NUMBER
+id -> ID
+
+int -> INT
+float -> FLOAT
+double -> DOUBLE
+String -> STRING
+text -> TEXT
+
+type -> TYPE
+array -> ARRAY
+if -> IF
+else -> ELSE
+relop -> RELOP

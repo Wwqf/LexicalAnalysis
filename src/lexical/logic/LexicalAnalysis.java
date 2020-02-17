@@ -1,14 +1,16 @@
 package lexical.logic;
 
-import lexical.algorithm.SubsetConstruction;
 import lexical.diagram.unit.State;
 import lexical.diagram.unit.StateType;
 import lexical.global.GlobalMark;
+import lexical.global.TokenTag;
 import lexical.structure.NondeterministicFiniteAutomaton;
 import lexical.structure.TransitionGraph;
+import lexical.table.TransitionTable;
 import lexical.token.BaseToken;
+import lexical.token.NoneToken;
 import lexical.token.TokenID;
-import log.Log;
+import lexical.token.TokenInstance;
 
 import java.util.*;
 
@@ -20,6 +22,9 @@ public class LexicalAnalysis {
 
 	private List<String> testcase;
 
+	private final State startState;
+	private NondeterministicFiniteAutomaton NFA;
+
 	public LexicalAnalysis() {
 		regular = new ReadRegular(GlobalMark.sampleFilename);
 		regular.generateDiagram();
@@ -30,45 +35,95 @@ public class LexicalAnalysis {
 				.Builder()
 				.setFilePath(testcase.get(0))
 				.build();
+
+		startState = new UnifiedCollection(transitionGraphs).getStartState();
+		NFA = new NondeterministicFiniteAutomaton(startState);
+
+		TransitionTable transitionTable = new TransitionTable(startState);
+//		System.out.println(transitionTable.process().toString());
 	}
 
 
 	public BaseToken getToken() {
-		State startState = new TransitionGraphSet(transitionGraphs).getStartState();
-		NondeterministicFiniteAutomaton automaton = new NondeterministicFiniteAutomaton(startState);
+		SAVE save = new SAVE();
+
+		Set<State> states = new LinkedHashSet<>();
+		states.add(startState);
 
 		char c = buffer.nextChar();
-		Set<State> sets = new LinkedHashSet<>(), preSets;
-		sets.add(startState);
-		preSets = sets;
-
 		while (c != BufferIO.EOF) {
-			sets = automaton.move(sets, c);
+			states = NFA.move(states, c);
+			if (states.isEmpty()) {
+				State acceptState = save.getAcceptState();
 
-			if (sets.size() == 0) {
-				// 没有匹配或者匹配过了, 检查preSets是否存在可接受的状态
+				if (acceptState != null) {
+					acceptState = save.getAcceptState(acceptState);
+					assert acceptState != null;
 
-				List<State> possibleStates = new ArrayList<>();
-				for (State s : preSets) {
-					if (s.getType() == StateType.ACCEPT_STATE) {
-						possibleStates.add(s);
-					}
+					String tokenValue = buffer.nextMorpheme();
+					return new TokenInstance(acceptState.token, tokenValue);
 				}
 
-				if (possibleStates.size() == 0) {
-					// no
-					Log.debug("error!");
-				} else {
-					// has
-					State acceptState = possibleStates.get(possibleStates.size() - 1);
-					System.out.println(buffer.nextMorpheme());
-				}
+				return null;
+			} else save.saveAcceptState(states);
 
-			}
 			c = buffer.nextChar();
-			preSets = sets;
 		}
 
-		return null;
+		State acceptState = save.getAcceptState();
+		NoneToken token = null;
+		if (acceptState != null) {
+			String tokenValue = buffer.nextMorpheme();
+			token = new NoneToken(tokenValue);
+		}
+
+		return token;
+	}
+
+	public final class SAVE {
+		List<List<State>> lists;
+
+		SAVE() {
+			lists = new ArrayList<>();
+		}
+
+		void saveAcceptState(Set<State> sets) {
+			List<State> save = new ArrayList<>();
+			for (State s : sets) {
+				if (checkHasEndState(s)) {
+					save.add(s);
+				}
+			}
+
+			if (!save.isEmpty())
+				lists.add(save);
+		}
+
+		State getAcceptState() {
+			if (lists.isEmpty()) return null;
+
+			List<State> items = lists.get(lists.size() - 1);
+			return items.get(items.size() - 1);
+		}
+
+		boolean checkHasEndState(State s) {
+			if (s.getType() == StateType.ACCEPT_STATE) return true;
+
+			Set<State> rec = NFA.move(s, 'ε');
+			for (State item : rec) {
+				if (item.getType() == StateType.ACCEPT_STATE) return true;
+			}
+			return false;
+		}
+
+		State getAcceptState(State s) {
+			if (s.getType() == StateType.ACCEPT_STATE) return s;
+
+			Set<State> rec = NFA.move(s, 'ε');
+			for (State item : rec) {
+				if (item.getType() == StateType.ACCEPT_STATE) return item;
+			}
+			return null;
+		}
 	}
 }

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lexical.algorithm.Thompson;
+import lexical.global.TokenTag;
 import lexical.structure.Production;
 import lexical.structure.TransitionGraph;
 import log.IOColor;
@@ -19,6 +20,7 @@ public class ReadRegular {
 
 	private JSONObject sampleJson;
 	private List<Production> productions;
+	private Map<String, TokenTag> tokens = new HashMap<>();
 	private Map<String, TransitionGraph> transitionGraphs = new LinkedHashMap<>();
 
 	public ReadRegular(String sampleFilename) {
@@ -72,7 +74,10 @@ public class ReadRegular {
 		GrammarFile grammarFile = new GrammarFile();
 
 		for (Object filename : template) {
-			productions.addAll(grammarFile.read(inputPath + filename).getGrammarList());
+			grammarFile.read(inputPath + filename).readData();
+			productions.addAll(grammarFile.grammarList);
+			// Todo 因为sample.json只读取一个文件，这里先这样写
+			this.tokens = grammarFile.tokens;
 		}
 		return this;
 	}
@@ -88,6 +93,7 @@ public class ReadRegular {
 		for (Production production : productions) {
 			Thompson thompson = new Thompson(transitionGraphs, production);
 			TransitionGraph graph = thompson.execute();
+			graph.token = tokens.get(production.getHead());
 			transitionGraphs.put(production.getHead(), graph);
 		}
 		return this;
@@ -109,7 +115,8 @@ public class ReadRegular {
 	/* 读取产生式集合，即一个输入文件 */
 	public static final class GrammarFile {
 		private BufferedReader reader;
-		private List<Production> grammarList = new ArrayList<>();;
+		private List<Production> grammarList = new ArrayList<>();
+		private Map<String, TokenTag> tokens = new HashMap<>();
 
 		public GrammarFile read(String filePath) {
 			File file = new File(filePath);
@@ -128,12 +135,27 @@ public class ReadRegular {
 			return this;
 		}
 
-		public List<Production> getGrammarList() {
+		public void readData() {
+			String line;
+			try {
+				while ((line = reader.readLine()) != null) {
+					if (line.trim().equals("%%")) {
+						readProduction();
+						readToken();
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		private void readProduction() {
 			String production;
 
 			try {
 				while ((production = reader.readLine()) != null) {
 					if (production.trim().equals("")) continue;
+					else if (production.trim().equals("%%")) break;
 
 					String[] strings = production.split("->");
 					if (strings.length != 2) {
@@ -146,8 +168,24 @@ public class ReadRegular {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
 
-			return grammarList;
+		private void readToken() {
+			String token;
+			try {
+				while ((token = reader.readLine()) != null) {
+					if (token.trim().equals("")) continue;
+
+					String[] strings = token.split("->");
+					if (strings.length != 2) {
+						System.out.println("The production rule has wrong.");
+						System.exit(1);
+					}
+					tokens.put(strings[0].trim(), TokenTag.match(strings[1].trim()));
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

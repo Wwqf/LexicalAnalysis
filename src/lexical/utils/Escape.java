@@ -19,7 +19,7 @@ public class Escape {
 			{'}','}'},
 			{'(','('},
 			{')',')'},
-
+			{'*', '*'}
 	};
 
 	public static char getEscape(Production production) {
